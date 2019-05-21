@@ -7,15 +7,19 @@ const moment =  require("moment")
 
 //append text files
 const fs = require("fs");
-var query = process.argv[3];
+var argument  = process.argv.slice(3).join(" ");
 
-var option = process.argv[2];
+var command  = process.argv[2];
 //Spotify Client
 const spotify = new Spotify(keys.spotify);
 
 
 
 function spotifyCall(songName) {
+    if(songName == ""){
+        songName = "The Sign";
+
+    }
     spotify.search({type: 'track',query:songName}, function(err, data) {
         if (err) {
             return console.log('Error occurred' + err);
@@ -25,17 +29,17 @@ function spotifyCall(songName) {
 }
 // Movie-this request with axios with the omdb api
 function movieThis(movieName) {
-    if (!movieName) {
-        movieName = "Mr.Nobdy";
+    if (movieName == "") {
+        movieName = "Mr. Nobdy";
     }
-    var queryUrl = "https://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy";
+    var queryUrl = "https://www.omdbapi.com/?apikey=trilogy&t=" + movieName;
     
     // axios request with axios to help debug the actual URL
     axios.get(queryUrl)
          .then(function(response) {
-
+    var resp = response.data;
                 //  console.log(response.data)
-                console.log("\n Movie Info " + response.data.Title + "\nRelease Year: " + response.data.Year + "\n Rating: " + response.data.Rated + "\n Release Country: " + response.data.Country + "\n Language: " + response.data.Language + "\n Plot: " + response.data.Country + "\n Actors: " + response.data.Actors + "\n" + "\n Really? This one?!?")
+                console.log("\n Movie Info " + resp.Title + "\nRelease Year: " + resp.Year + "\n Rating: " + resp.Rated + "\n Release Country: " + resp.Country + "\n Language: " + resp.Language + "\n Plot: " + resp.Country + "\n Actors: " + resp.Actors + "\n" + "\n Really? This one?!?")
             
          });
 
@@ -52,24 +56,67 @@ function concertThis(artist) {
          })
 }
 
-switch(option){
-    case "movie-this":
-        movieThis(query);
-        break;
-    case "spotify-this-song":
-        spotifyCall(query);
-        break;
-    case "concert-this":
-        concertThis(query);
-        break;
-    default:
-        fs.readFile("random.txt", "UTF8", function(error, data){
-            var data = data.split(",");
-            var wantIt = data[1];
-            if (error){
-                return console.log(error)
-            }
-            //Call Function
-            spotifyCall(wantIt);
-        })
+function doWhatSays(){
+    fs.readFile("random.txt", "UTF8", function(error, data){
+        var data = data.split(",");
+
+        let  argument = data[1];
+        let command = data[0];
+        if (error){
+            return console.log(error)
+        }else if(command === "concert-this"){
+                concertThis(argument);
+
+        }else if(command === "movie-this"){
+                movieThis(argument);
+            
+        }else if(command === "spotify-this-song"){
+                spotifyCall(argument);
+        }
+
+        for(i = 0; i < data.length ; i++){
+            console.log(data[i]);
+        }
+       
+  
+    })
 }
+
+if(command === "concert-this"){
+    concertThis(argument);
+
+}else if(command === "movie-this"){
+    movieThis(argument);
+
+}else if(command === "spotify-this-song"){
+    spotifyCall(argument);
+
+}else if(command === "do-what-it-says"){
+    doWhatSays();
+}
+
+
+
+// switch(command){
+//     case "movie-this":
+//         movieThis(argument);
+//         break;
+//     case "spotify-this-song":
+//         spotifyCall(argument);
+//         break;
+//     case "concert-this":
+//         concertThis(argument);
+//         break;
+        
+
+//     default:
+//         fs.readFile("random.txt", "UTF8", function(error, data){
+//             var data = data.split(",");
+//             var wantIt = data[1];
+//             if (error){
+//                 return console.log(error)
+//             }
+//             //Call Function
+//             spotifyCall(wantIt);
+//         })
+// }
